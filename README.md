@@ -1,4 +1,3 @@
-gcc -Wall -g -o cca2526-23917-23919-ex23 cca2526-23917-23919-ex23.c -lgmp -lcrypto
 # GMP Toolbox
 
 Collection of small C programs that explore number theory and cryptography tasks using the GNU Multiple Precision Library (GMP). A simple text menu (`src/menu.c`) lets you pick and run any exercise binary inside `src/scripts`.
