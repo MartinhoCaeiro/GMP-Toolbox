@@ -94,7 +94,7 @@ int decifrar_simetrico(const char *input_file, const char *output_file, const un
     return 1;
 }
 
-// Funções RSA existentes omitidas por brevidade no exemplo...
+
 
 int main() {
     mpz_t e, d, n_pub, n_priv;
@@ -109,15 +109,13 @@ int main() {
 
     while (1) {
         printf("\n==== MENU ===="
-               "\n1. Cifrar ficheiro com RSA"
-               "\n2. Decifrar ficheiro com RSA"
-               "\n3. Cifrar ficheiro com chave simétrica (AES-256)"
-               "\n4. Decifrar ficheiro com chave simétrica (AES-256)"
-               "\n5. Sair"
+               "\n1. Cifrar ficheiro com chave simétrica (AES-256)"
+               "\n2. Decifrar ficheiro com chave simétrica (AES-256)"
+               "\n0. Sair"
                "\nEscolha uma opcao: ");
         scanf("%s", opcao);
 
-        if (strcmp(opcao, "3") == 0) {
+        if (strcmp(opcao, "1") == 0) {
             RAND_bytes(key, AES_KEY_SIZE);
             RAND_bytes(iv, AES_IV_SIZE);
             printf("Nome do ficheiro a cifrar: "); scanf("%s", filename);
@@ -130,7 +128,7 @@ int main() {
             printf("\n");
         }
 
-        else if (strcmp(opcao, "4") == 0) {
+        else if (strcmp(opcao, "2") == 0) {
             char key_hex[65], iv_hex[33];
             printf("Introduza a chave em hex: "); scanf("%64s", key_hex);
             printf("Introduza o IV em hex: "); scanf("%32s", iv_hex);
@@ -141,7 +139,7 @@ int main() {
             decifrar_simetrico(filename, outputfile, key, iv);
         }
 
-        else if (strcmp(opcao, "5") == 0) break;
+        else if (strcmp(opcao, "0") == 0) break;
         else printf("Opcao inválida.\n");
     }
 
