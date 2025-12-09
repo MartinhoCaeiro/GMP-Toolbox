@@ -7,7 +7,7 @@
 void show_help(const char *name) {
     printf("Descrição:\n");
     printf("  Lista todos os números primos inferiores ao limite máximo fornecido.\n");
-    printf("  O limite máximo deve ser um número inteiro positivo (em base 10).\n");
+    printf("  O limite máximo deve ser um número inteiro positivo.\n");
     printf("Uso:\n");
     printf("  %s <limite> <ficheiro_saida>\n\n", name);
 }
