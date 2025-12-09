@@ -40,7 +40,6 @@ int main() {
     for (int i = 0; i < num_sizes; i++) {
         int bits = key_sizes[i];
         clock_t start, end;
-        double elapsed;
 
         // Initialize variables
         mpz_t p, q, n, phi, e, d, gcd;
@@ -92,7 +91,7 @@ int main() {
 
     fclose(csv);
 
-    printf("\nCSV 'rsa_times.csv' gerado. Abrindo gráfico via gnuplot...\n");
+    printf("\nCSV 'rsa_times.csv' gerado. Armazenando gráfico em 'rsa_times.png'...\n");
 
     // Plot using gnuplot
     FILE *gp = popen("gnuplot -persistent", "w");
@@ -102,6 +101,9 @@ int main() {
     fprintf(gp, "set xlabel 'Tamanho da chave (bits)'\n");
     fprintf(gp, "set ylabel 'Tempo (segundos)'\n");
     fprintf(gp, "set grid\n");
+    fprintf(gp, "set term pngcairo size 900,600\n");
+    fprintf(gp, "set output 'rsa_times.png'\n");
+    fprintf(gp, "set datafile separator ','\n");  // Read CSV
     fprintf(gp, "plot 'rsa_times.csv' using 1:2 with linespoints lw 2 lt rgb 'red' title 'Geração de chaves', \\\n");
     fprintf(gp, "     'rsa_times.csv' using 1:3 with linespoints lw 2 lt rgb 'blue' title 'Cifra', \\\n");
     fprintf(gp, "     'rsa_times.csv' using 1:4 with linespoints lw 2 lt rgb 'green' title 'Decifra'\n");
