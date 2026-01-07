@@ -4,18 +4,18 @@
 
 mpz_t a, c, m, seed;
 
-/* Função LCG usando GMP */
+// LCG function
 void lcg(mpz_t result) {
-    mpz_mul(result, a, seed);    /* result = a * seed */
-    mpz_add(result, result, c);  /* result = a*seed + c */
-    mpz_mod(result, result, m);  /* result = (a*seed + c) mod m */
-    mpz_set(seed, result);       /* atualizar a semente */
+    mpz_mul(result, a, seed);   
+    mpz_add(result, result, c);  
+    mpz_mod(result, result, m);  
+    mpz_set(seed, result);      
 }
 
 int main() {
     FILE *fconfig, *fout;
     char nomeConfig[100], nomeSaida[100];
-    int n, opcao;
+    int n, option;
 
     mpz_init(a);
     mpz_init(c);
@@ -31,7 +31,7 @@ int main() {
         return 1;
     }
 
-    /* Lê os valores do ficheiro (a, c, m, seed) */
+    // Read values from file (a, c, m, seed)
     if (mpz_inp_str(a, fconfig, 10) == 0 ||
         mpz_inp_str(c, fconfig, 10) == 0 ||
         mpz_inp_str(m, fconfig, 10) == 0 ||
@@ -44,13 +44,13 @@ int main() {
     fclose(fconfig);
 
     do {
-        printf("\n--- Gerador LCG (GMP) ---\n");
-        printf("1 - Gerar valores pseudo-aleatorios\n");
-        printf("0 - Sair\n");
-        printf("Opcao: ");
-        scanf("%d", &opcao);
+        printf("\n--- Gerador LCG (GMP) ---");
+        printf("\n1 - Gerar valores pseudo-aleatorios");
+        printf("\n0 - Sair");
+        printf("\nEscolha uma opção: ");
+        scanf("%d", &option);
 
-        if (opcao == 1) {
+        if (option == 1) {
             printf("Quantos valores deseja gerar? ");
             scanf("%d", &n);
 
@@ -78,7 +78,7 @@ int main() {
             printf("Foram gerados %d valores para '%s'.\n", n, nomeSaida);
         }
 
-    } while (opcao != 0);
+    } while (option != 0);
 
     mpz_clear(a);
     mpz_clear(c);

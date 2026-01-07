@@ -6,10 +6,8 @@
 
 #define MAX_FILENAME 256
 
-// -----------------------------------------------------------
-//  GERAR PRIMO ENTRE 2^(k-1) E 2^k - 1
-// -----------------------------------------------------------
-void gerar_primo_k_bits(mpz_t primo, gmp_randstate_t estado, unsigned int k) {
+// Generate a prime number between 2^(k-1) and 2^k - 1
+void generate_prime_k_bits(mpz_t prime, gmp_randstate_t state, unsigned int k) {
     mpz_t min, max, range;
     mpz_inits(min, max, range, NULL);
 
@@ -24,29 +22,27 @@ void gerar_primo_k_bits(mpz_t primo, gmp_randstate_t estado, unsigned int k) {
     mpz_sub(range, max, min);
 
     do {
-        mpz_urandomm(primo, estado, range);
-        mpz_add(primo, primo, min);
-        mpz_nextprime(primo, primo);
-    } while (mpz_cmp(primo, max) > 0);
+        mpz_urandomm(prime, state, range);
+        mpz_add(prime, prime, min);
+        mpz_nextprime(prime, prime);
+    } while (mpz_cmp(prime, max) > 0);
 
     mpz_clears(min, max, range, NULL);
 }
 
-// -----------------------------------------------------------
-//  GERAR CHAVES RSA
-// -----------------------------------------------------------
-void gerar_chave_RSA(unsigned int k) {
-    gmp_randstate_t estado;
-    gmp_randinit_default(estado);
-    gmp_randseed_ui(estado, time(NULL));
+// Generate RSA key pair
+void generate_rsa_keys(unsigned int k) {
+    gmp_randstate_t state;
+    gmp_randinit_default(state);
+    gmp_randseed_ui(state, time(NULL));
 
     mpz_t p, q, n, phi, e, d, p1, q1;
     mpz_inits(p, q, n, phi, e, d, p1, q1, NULL);
 
     printf("A gerar primos %u-bit...\n", k);
 
-    gerar_primo_k_bits(p, estado, k);
-    gerar_primo_k_bits(q, estado, k);
+    generate_prime_k_bits(p, state, k);
+    generate_prime_k_bits(q, state, k);
 
     // n = p * q
     mpz_mul(n, p, q);
@@ -56,13 +52,13 @@ void gerar_chave_RSA(unsigned int k) {
     mpz_sub_ui(q1, q, 1);
     mpz_mul(phi, p1, q1);
 
-    // e = 65537 (valor recomendado)
+    // e = 65537 (recommended value)
     mpz_set_ui(e, 65537);
 
     // d = e^-1 mod φ
     mpz_invert(d, e, phi);
 
-    // Guardar chave pública
+    // Save public key
     FILE* pub = fopen("public.myasc", "w");
     gmp_fprintf(pub, "%Zd,%Zd", e, n);
     fclose(pub);
@@ -76,13 +72,11 @@ void gerar_chave_RSA(unsigned int k) {
     printf("Chaves RSA %u-bit geradas com sucesso!\n", k);
 
     mpz_clears(p, q, n, phi, e, d, p1, q1, NULL);
-    gmp_randclear(estado);
+    gmp_randclear(state);
 }
 
-// -----------------------------------------------------------
-//  LER CHAVES
-// -----------------------------------------------------------
-int ler_chave_publica(const char *filename, mpz_t e, mpz_t n) {
+// Read public key (e,n)
+int read_public_key(const char *filename, mpz_t e, mpz_t n) {
     FILE *fp = fopen(filename, "r");
     if (!fp) { perror("Erro ao abrir chave pública"); return 0; }
     if (gmp_fscanf(fp, "%Zd,%Zd", e, n) != 2) {
@@ -93,11 +87,12 @@ int ler_chave_publica(const char *filename, mpz_t e, mpz_t n) {
     return 1;
 }
 
-int ler_chave_privada(const char *filename, mpz_t d, mpz_t n) {
+// Read private key (d,n)
+int read_private_key(const char *filename, mpz_t d, mpz_t n) {
     FILE *fp = fopen(filename, "r");
     if (!fp) { perror("Erro ao abrir chave privada"); return 0; }
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), fp); // ignora "Chave Privada:"
+    fgets(buffer, sizeof(buffer), fp); // skip first line
     if (gmp_fscanf(fp, "%Zd,%Zd", d, n) != 2) {
         printf("Erro ao ler chave privada.\n");
         fclose(fp); return 0;
@@ -106,21 +101,20 @@ int ler_chave_privada(const char *filename, mpz_t d, mpz_t n) {
     return 1;
 }
 
-// -----------------------------------------------------------
-//  CIFRAR
-// -----------------------------------------------------------
-size_t calcular_tamanho_bloco(mpz_t n) {
+// Calculate maximum number of bytes per block based on n
+size_t calculate_block_size(mpz_t n) {
     size_t bits_n = mpz_sizeinbase(n, 2);
     return (bits_n - 1) / 8;
 }
 
-int cifrar_ficheiro(const char *input_file, const char *output_file, mpz_t e, mpz_t n) {
+// Encrypt file using variable block size
+int encrypt_file(const char *input_file, const char *output_file, mpz_t e, mpz_t n) {
     FILE *in = fopen(input_file, "rb");
     if (!in) { perror("Erro ao abrir ficheiro"); return 0; }
     FILE *out = fopen(output_file, "w");
     if (!out) { perror("Erro ao abrir ficheiro"); fclose(in); return 0; }
 
-    size_t block_size = calcular_tamanho_bloco(n);
+    size_t block_size = calculate_block_size(n);
     unsigned char *buffer = malloc(block_size);
     if (!buffer) { perror("Memória insuficiente"); fclose(in); fclose(out); return 0; }
 
@@ -145,16 +139,14 @@ int cifrar_ficheiro(const char *input_file, const char *output_file, mpz_t e, mp
     return 1;
 }
 
-// -----------------------------------------------------------
-//  DECIFRAR
-// -----------------------------------------------------------
-int decifrar_ficheiro(const char *input_file, const char *output_file, mpz_t d, mpz_t n) {
+// Decrypt file using variable block size
+int decrypt_file(const char *input_file, const char *output_file, mpz_t d, mpz_t n) {
     FILE *in = fopen(input_file, "r");
     if (!in) { perror("Erro ao abrir ficheiro"); return 0; }
     FILE *out = fopen(output_file, "wb");
     if (!out) { perror("Erro ao abrir ficheiro"); fclose(in); return 0; }
 
-    size_t block_size = calcular_tamanho_bloco(n);
+    size_t block_size = calculate_block_size(n);
     unsigned char *bytes = malloc(block_size);
     if (!bytes) { perror("Memória insuficiente"); fclose(in); fclose(out); return 0; }
 
@@ -180,14 +172,11 @@ int decifrar_ficheiro(const char *input_file, const char *output_file, mpz_t d, 
     return 1;
 }
 
-// -----------------------------------------------------------
-//  MAIN
-// -----------------------------------------------------------
 int main() {
     mpz_t e, d, n_pub, n_priv;
     mpz_inits(e, d, n_pub, n_priv, NULL);
 
-    char opcao[10];
+    char option[10];
     char filename[MAX_FILENAME];
     char outputfile[MAX_FILENAME];
 
@@ -197,38 +186,38 @@ int main() {
         printf("2. Decifrar ficheiro com chave privada\n");
         printf("3. Gerar novas chaves RSA\n");
         printf("4. Sair\n");
-        printf("Escolha uma opcao: ");
-        scanf("%s", opcao);
+        printf("Escolha uma opção: ");
+        scanf("%s", option);
 
-        if (strcmp(opcao, "1") == 0) {
-            if (!ler_chave_publica("public.myasc", e, n_pub)) continue;
+        if (strcmp(option, "1") == 0) {
+            if (!read_public_key("public.myasc", e, n_pub)) continue;
             printf("Nome do ficheiro a cifrar: ");
             scanf("%s", filename);
             printf("Nome do ficheiro de saída cifrado: ");
             scanf("%s", outputfile);
-            if (cifrar_ficheiro(filename, outputfile, e, n_pub))
+            if (encrypt_file(filename, outputfile, e, n_pub))
                 printf("Ficheiro cifrado com sucesso!\n");
         }
-        else if (strcmp(opcao, "2") == 0) {
-            if (!ler_chave_privada("secret.myasc", d, n_priv)) continue;
+        else if (strcmp(option, "2") == 0) {
+            if (!read_private_key("secret.myasc", d, n_priv)) continue;
             printf("Nome do ficheiro a decifrar: ");
             scanf("%s", filename);
             printf("Nome do ficheiro de saída decifrado: ");
             scanf("%s", outputfile);
-            if (decifrar_ficheiro(filename, outputfile, d, n_priv))
+            if (decrypt_file(filename, outputfile, d, n_priv))
                 printf("Ficheiro decifrado com sucesso!\n");
         }
-        else if (strcmp(opcao, "3") == 0) {
+        else if (strcmp(option, "3") == 0) {
             unsigned int k;
             printf("Introduza o tamanho da chave (k bits): ");
             scanf("%u", &k);
-            gerar_chave_RSA(k);
+            generate_rsa_keys(k);
         }
-        else if (strcmp(opcao, "4") == 0) {
+        else if (strcmp(option, "4") == 0) {
             break;
         }
         else {
-            printf("Opcao inválida.\n");
+            printf("Opção inválida.\n");
         }
     }
 

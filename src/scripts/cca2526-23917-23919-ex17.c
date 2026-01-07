@@ -41,7 +41,7 @@ int main() {
         int bits = key_sizes[i];
         clock_t start, end;
 
-        // Initialize variables
+        // Initialize mpz_t variables
         mpz_t p, q, n, phi, e, d, gcd;
         mpz_t m, c, decrypted;
         mpz_inits(p,q,n,phi,e,d,gcd,NULL);
@@ -62,14 +62,14 @@ int main() {
 
         mpz_set_ui(e,65537);
         mpz_gcd(gcd,e,phi);
-        if (mpz_cmp_ui(gcd,1)!=0) { fprintf(stderr,"Erro: e não coprimo\n"); return 1;}
+        if (mpz_cmp_ui(gcd,1)!=0) { fprintf(stderr,"Erro: e não é co-primo\n"); return 1;}
         mpz_invert(d,e,phi);
 
         end = clock();
         double keygen_time = ((double)(end-start))/CLOCKS_PER_SEC;
 
         // Encryption
-        random_mpz(m, bits-2); // message smaller than n
+        random_mpz(m, bits-2); 
         start = clock();
         rsa_encrypt(c,m,e,n);
         end = clock();

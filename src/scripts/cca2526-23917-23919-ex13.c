@@ -12,6 +12,7 @@ int main() {
     char limit_str[MAX_STR];
     char filename[MAX_FILENAME];
     
+    // Initialize mpz_t variables
     mpz_t limit;
     mpz_init(limit);
 

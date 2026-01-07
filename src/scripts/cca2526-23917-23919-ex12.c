@@ -12,6 +12,7 @@ int main() {
     char limit_str[MAX_STR];
     char filename[MAX_FILENAME];
     
+    // Initialize mpz_t variables
     mpz_t limit;
     mpz_init(limit);
 
@@ -21,12 +22,12 @@ int main() {
         printf("0 - Sair\n");
         printf("Opção: ");
         scanf("%d", &option);
-        getchar(); // limpar buffer
+        getchar(); 
 
         if (option == 1) {
             printf("Introduza o limite máximo: ");
             scanf("%9999s", limit_str);
-            getchar(); // limpar buffer
+            getchar(); 
 
             if (mpz_set_str(limit, limit_str, 10) != 0) {
                 printf("Erro: limite inválido!\n");
@@ -35,7 +36,7 @@ int main() {
 
             printf("Introduza o nome do ficheiro de saída: ");
             scanf("%1023s", filename);
-            getchar(); // limpar buffer
+            getchar(); 
 
             FILE *fp = fopen(filename, "w");
             if (!fp) {
@@ -43,7 +44,7 @@ int main() {
                 continue;
             }
 
-            // Gerar primos menores que o limite
+            // Generate primes up to the limit
             mpz_t prime;
             mpz_init_set_ui(prime, 2);
 
@@ -58,15 +59,15 @@ int main() {
 
             printf("Primos encontrados: %zu\n", prime_count);
 
-            // Calcular combinações dois a dois
+            // Calculate products and their factorizations
             mpz_t product;
             mpz_init(product);
 
             for (size_t i = 0; i < prime_count; i++) {
-                for (size_t j = i; j < prime_count; j++) { // i <= j para incluir quadrados
+                for (size_t j = i; j < prime_count; j++) { 
                     mpz_mul(product, primes[i], primes[j]);
 
-                    // Fatoração
+                    // Fatorization
                     mpz_t n, factor;
                     mpz_init_set(n, product);
                     mpz_init_set_ui(factor, 2);
@@ -91,7 +92,7 @@ int main() {
                 }
             }
 
-            // Liberar memória dos primos
+            // Free memory
             for (size_t i = 0; i < prime_count; i++) {
                 mpz_clear(primes[i]);
             }

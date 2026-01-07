@@ -3,8 +3,7 @@
 #include <string.h>
 #include <gmp.h>
 
-/* ------------ RC4 (byte oriented) ------------ */
-
+// Initialize RC4 state array
 void rc4_init(unsigned char *S, const unsigned char *key, int keylen) {
     int i, j = 0;
     unsigned char temp;
@@ -20,6 +19,7 @@ void rc4_init(unsigned char *S, const unsigned char *key, int keylen) {
     }
 }
 
+// RC4 encrypt/decrypt data (symmetric cipher)
 void rc4_crypt(unsigned char *data, int len, const unsigned char *key, int keylen) {
     unsigned char S[256];
     rc4_init(S, key, keylen);
@@ -40,9 +40,8 @@ void rc4_crypt(unsigned char *data, int len, const unsigned char *key, int keyle
     }
 }
 
-/* --------- LER FICHEIROS --------- */
-
-int ler_ficheiro_texto(const char *nome, unsigned char **buffer) {
+// Read text file into buffer
+int read_text_file(const char *nome, unsigned char **buffer) {
     FILE *f = fopen(nome, "r");
     if (!f) return -1;
 
@@ -60,7 +59,8 @@ int ler_ficheiro_texto(const char *nome, unsigned char **buffer) {
     return (int)size;
 }
 
-int ler_ficheiro_binario(const char *nome, unsigned char **buffer) {
+// Read binary file into buffer
+int read_binary_file(const char *nome, unsigned char **buffer) {
     FILE *f = fopen(nome, "rb");
     if (!f) return -1;
 
@@ -76,14 +76,15 @@ int ler_ficheiro_binario(const char *nome, unsigned char **buffer) {
     return (int)size;
 }
 
-void escrever_ficheiro_binario(const char *nome, unsigned char *data, int len) {
+// Write data to binary file
+void write_binary_file(const char *nome, unsigned char *data, int len) {
     FILE *f = fopen(nome, "wb");
     fwrite(data, 1, len, f);
     fclose(f);
 }
 
-/* --------- LER CHAVE EM GMP --------- */
-int carregar_chave_gmp(const char *ficheiro, unsigned char **key) {
+// Load RC4 key from GMP file
+int load_key_gmp(const char *ficheiro, unsigned char **key) {
     mpz_t k;
     mpz_init(k);
 
@@ -93,101 +94,99 @@ int carregar_chave_gmp(const char *ficheiro, unsigned char **key) {
     if (mpz_inp_str(k, f, 10) == 0) { fclose(f); mpz_clear(k); return -1; }
     fclose(f);
 
-    /* Converter inteiro GMP em bytes */
+    // Convert GMP integer to bytes
     size_t len = (mpz_sizeinbase(k, 2) + 7) / 8;
     unsigned char *buf = (unsigned char *) malloc(len);
-    mpz_export(buf, &len, 1, 1, 1, 0, k);  // big endian
+    mpz_export(buf, &len, 1, 1, 1, 0, k);  
 
     *key = buf;
     mpz_clear(k);
     return (int)len;
 }
 
-/* ===================== MAIN ===================== */
-
 int main() {
     unsigned char *key = NULL;
     int keylen;
-    char ficheiro_chave[100];
+    char key_filename[100];
 
     printf("Nome do ficheiro com a chave RC4 (GMP inteiro): ");
-    scanf("%99s", ficheiro_chave);
+    scanf("%99s", key_filename);
 
-    keylen = carregar_chave_gmp(ficheiro_chave, &key);
+    keylen = load_key_gmp(key_filename, &key);
     if (keylen <= 0) {
         printf("Erro ao carregar chave.\n");
         return 1;
     }
 
-    int opcao;
+    int option;
     do {
-        printf("\n--- RC4 (com chave GMP) ---\n");
-        printf("1 - Cifrar\n");
-        printf("2 - Decifrar\n");
-        printf("0 - Sair\n");
-        printf("Opcao: ");
-        scanf("%d", &opcao);
+        printf("\n--- RC4 (com chave GMP) ---");
+        printf("\n1 - Cifrar");
+        printf("\n2 - Decifrar");
+        printf("\n0 - Sair");
+        printf("\nEscolha uma opção: ");
+        scanf("%d", &option);
 
-        if (opcao == 1 || opcao == 2) {
-            int tipo;
-            unsigned char *entrada = NULL;
-            int tamanho = 0;
+        if (option == 1 || option == 2) {
+            int type;
+            unsigned char *entry = NULL;
+            int size = 0;
 
-            printf("\nEntrada:\n");
-            printf("1 - Inline\n");
-            printf("2 - Ficheiro de texto\n");
-            printf("3 - Ficheiro binario\n");
-            printf("Opcao: ");
-            scanf("%d", &tipo);
+            printf("\nEntrada:");
+            printf("\n1 - Inline");
+            printf("\n2 - Ficheiro de texto");
+            printf("\n3 - Ficheiro binario");
+            printf("\nEscolha uma opção: ");
+            scanf("%d", &type);
 
-            if (tipo == 1) {
+            if (type == 1) {
                 char temp[4096];
                 printf("Introduza a mensagem/criptograma: ");
                 getchar();
                 fgets(temp, sizeof(temp), stdin);
 
-                tamanho = strlen(temp);
-                if (temp[tamanho - 1] == '\n') tamanho--;
+                size = strlen(temp);
+                if (temp[size - 1] == '\n') size--;
 
-                entrada = (unsigned char *) malloc(tamanho);
-                memcpy(entrada, temp, tamanho);
+                entry = (unsigned char *) malloc(size);
+                memcpy(entry, temp, size);
 
-            } else if (tipo == 2) {
+            } else if (type == 2) {
                 char nome[100];
                 printf("Nome do ficheiro: ");
                 scanf("%99s", nome);
-                tamanho = ler_ficheiro_texto(nome, &entrada);
-                if (tamanho < 0) { printf("Erro ao ler ficheiro.\n"); continue; }
+                size = read_text_file(nome, &entry);
+                if (size < 0) { printf("Erro ao ler ficheiro.\n"); continue; }
 
-            } else if (tipo == 3) {
+            } else if (type == 3) {
                 char nome[100];
                 printf("Nome do ficheiro binario: ");
                 scanf("%99s", nome);
-                tamanho = ler_ficheiro_binario(nome, &entrada);
-                if (tamanho < 0) { printf("Erro ao ler ficheiro.\n"); continue; }
+                size = read_binary_file(nome, &entry);
+                if (size < 0) { printf("Erro ao ler ficheiro.\n"); continue; }
             }
 
-            /* RC4 é simétrico */
-            rc4_crypt(entrada, tamanho, key, keylen);
+            // RC4 is symmetric
+            rc4_crypt(entry, size, key, keylen);
 
-            if (tipo == 1) {
-                printf("\nResultado em HEX (%d bytes):\n", tamanho);
-                for (int i = 0; i < tamanho; i++)
-                    printf("%02X ", entrada[i]);
+            if (type == 1) {
+                printf("\nResultado em HEX (%d bytes):\n", size);
+                for (int i = 0; i < size; i++)
+                    printf("%02X ", entry[i]);
                 printf("\n");
 
             } else {
                 char out[100];
                 printf("Nome do ficheiro de saida: ");
                 scanf("%99s", out);
-                escrever_ficheiro_binario(out, entrada, tamanho);
+                write_binary_file(out, entry, size);
                 printf("Guardado em %s.\n", out);
             }
 
-            free(entrada);
+            free(entry);
         }
 
-    } while (opcao != 0);
+    } while (option != 0);
 
     free(key);
     return 0;

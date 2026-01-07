@@ -87,7 +87,6 @@ int main() {
     printf("Tempo para calcular d: %.6f segundos\n", elapsed);
 
     // Save keys to files
-
     FILE *pub = fopen("public.key", "w");
     FILE *priv = fopen("private.key", "w");
 
@@ -104,7 +103,7 @@ int main() {
 
     printf("Chaves geradas e gravadas em 'public.key' e 'private.key'.\n");
 
-    // 5. Free memory
+    // Free memory
     mpz_clears(p, q, n, phi, e, d, gcd, p1, q1, NULL);
 
     return 0;

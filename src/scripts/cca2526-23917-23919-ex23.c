@@ -9,7 +9,8 @@
 #define AES_KEY_SIZE 32
 #define AES_IV_SIZE 16
 
-int ler_chave_publica(const char *filename, mpz_t e, mpz_t n) {
+// Read public key (e,n)
+int read_public_key(const char *filename, mpz_t e, mpz_t n) {
     FILE *fp = fopen(filename, "r");
     if (!fp) { perror("Erro ao abrir chave pública"); return 0; }
     if (gmp_fscanf(fp, "%Zd,%Zd", e, n) != 2) {
@@ -19,7 +20,8 @@ int ler_chave_publica(const char *filename, mpz_t e, mpz_t n) {
     return 1;
 }
 
-int ler_chave_privada(const char *filename, mpz_t d, mpz_t n) {
+// Read private key (d,n)
+int read_private_key(const char *filename, mpz_t d, mpz_t n) {
     FILE *fp = fopen(filename, "r");
     if (!fp) { perror("Erro ao abrir chave privada"); return 0; }
     char buffer[1024];
@@ -31,13 +33,15 @@ int ler_chave_privada(const char *filename, mpz_t d, mpz_t n) {
     return 1;
 }
 
-size_t calcular_tamanho_bloco(mpz_t n) {
+// Calculate maximum number of bytes per block based on n
+size_t calculate_block_size(mpz_t n) {
     size_t bits_n = mpz_sizeinbase(n, 2);
     size_t max_bytes = (bits_n - 1) / 8;
     return max_bytes;
 }
 
-int cifrar_simetrico(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv) {
+// Encrypt file using AES-256-CBC
+int encrypt_symmetric(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv) {
     FILE *in = fopen(input_file, "rb");
     if (!in) { perror("Erro ao abrir ficheiro"); return 0; }
     FILE *out = fopen(output_file, "wb");
@@ -63,7 +67,8 @@ int cifrar_simetrico(const char *input_file, const char *output_file, const unsi
     return 1;
 }
 
-int decifrar_simetrico(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv) {
+// Decrypt file using AES-256-CBC
+int decrypt_symmetric(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv) {
     FILE *in = fopen(input_file, "rb");
     if (!in) { perror("Erro ao abrir ficheiro"); return 0; }
     FILE *out = fopen(output_file, "wb");
@@ -94,13 +99,11 @@ int decifrar_simetrico(const char *input_file, const char *output_file, const un
     return 1;
 }
 
-
-
 int main() {
     mpz_t e, d, n_pub, n_priv;
     mpz_inits(e, d, n_pub, n_priv, NULL);
 
-    char opcao[10];
+    char option[10];
     char filename[MAX_FILENAME];
     char outputfile[MAX_FILENAME];
 
@@ -112,15 +115,15 @@ int main() {
                "\n1. Cifrar ficheiro com chave simétrica (AES-256)"
                "\n2. Decifrar ficheiro com chave simétrica (AES-256)"
                "\n0. Sair"
-               "\nEscolha uma opcao: ");
-        scanf("%s", opcao);
+               "\nEscolha uma opção: ");
+        scanf("%s", option);
 
-        if (strcmp(opcao, "1") == 0) {
+        if (strcmp(option, "1") == 0) {
             RAND_bytes(key, AES_KEY_SIZE);
             RAND_bytes(iv, AES_IV_SIZE);
             printf("Nome do ficheiro a cifrar: "); scanf("%s", filename);
             printf("Nome de saída: "); scanf("%s", outputfile);
-            cifrar_simetrico(filename, outputfile, key, iv);
+            encrypt_symmetric(filename, outputfile, key, iv);
             printf("Chave para decifrar (hex): ");
             for (int i = 0; i < AES_KEY_SIZE; i++) printf("%02X", key[i]);
             printf("\nIV (hex): ");
@@ -128,7 +131,7 @@ int main() {
             printf("\n");
         }
 
-        else if (strcmp(opcao, "2") == 0) {
+        else if (strcmp(option, "2") == 0) {
             char key_hex[65], iv_hex[33];
             printf("Introduza a chave em hex: "); scanf("%64s", key_hex);
             printf("Introduza o IV em hex: "); scanf("%32s", iv_hex);
@@ -136,11 +139,11 @@ int main() {
             for (int i = 0; i < AES_IV_SIZE; i++) sscanf(&iv_hex[i*2], "%2hhx", &iv[i]);
             printf("Ficheiro cifrado: "); scanf("%s", filename);
             printf("Ficheiro decifrado: "); scanf("%s", outputfile);
-            decifrar_simetrico(filename, outputfile, key, iv);
+            decrypt_symmetric(filename, outputfile, key, iv);
         }
 
-        else if (strcmp(opcao, "0") == 0) break;
-        else printf("Opcao inválida.\n");
+        else if (strcmp(option, "0") == 0) break;
+        else printf("Opção inválida.\n");
     }
 
     mpz_clears(e, d, n_pub, n_priv, NULL);
