@@ -21,8 +21,8 @@ int main() {
     mpz_init(c);
     mpz_init(m);
     mpz_init(seed);
-
-    printf("Nome do ficheiro de configuracao: ");
+    printf("Deve ter o formato: Multiplicador (a), Incremento (c), Módulo (m), Semente (seed) (cada valor em uma linha)\n");
+    printf("Nome do ficheiro de configuração: ");
     scanf("%99s", nomeConfig);
 
     fconfig = fopen(nomeConfig, "r");
@@ -44,7 +44,7 @@ int main() {
     fclose(fconfig);
 
     do {
-        printf("\n--- Gerador LCG (GMP) ---");
+        printf("\n=====Gerador LCG (GMP) =====\n");
         printf("\n1 - Gerar valores pseudo-aleatorios");
         printf("\n0 - Sair");
         printf("\nEscolha uma opção: ");

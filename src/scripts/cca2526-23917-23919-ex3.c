@@ -8,7 +8,7 @@ int main() {
 
     // Initialize mpz_t variables
     mpz_init(num);
-
+    printf("===== Verificação de Números Primos =====\n");
     // Read user input
     printf("Introduza um número inteiro: ");
     scanf("%9999s", str);

@@ -7,7 +7,7 @@ int main() {
     gmp_randstate_t state;
     gmp_randinit_default(state);
     gmp_randseed_ui(state, time(NULL));
-
+    printf("===== Geração de Chaves RSA =====\n");
     int bits;
     printf("Introduza o tamanho das chaves em bits: ");
     scanf("%d", &bits);

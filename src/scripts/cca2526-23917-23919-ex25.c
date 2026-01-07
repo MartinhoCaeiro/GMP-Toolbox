@@ -120,7 +120,7 @@ int main() {
 
     int option;
     do {
-        printf("\n--- RC4 (com chave GMP) ---");
+        printf("\n===== RC4 (com chave GMP) =====\n");
         printf("\n1 - Cifrar");
         printf("\n2 - Decifrar");
         printf("\n0 - Sair");

@@ -9,7 +9,7 @@ int main() {
     mpz_init(num1);
     mpz_init(num2);
     mpz_init(result);
-
+    printf("===== Cálculo do Máximo Divisor Comum (GCD) =====\n");
     // Read user input
     printf("Introduza o primeiro número inteiro: ");
     scanf("%9999s", str1);

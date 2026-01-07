@@ -121,7 +121,7 @@ int main() {
         printf("\n==== MENU ====\n");
         printf("1. Cifrar ficheiro com chave publica\n");
         printf("2. Decifrar ficheiro com chave privada\n");
-        printf("3. Sair\n");
+        printf("0. Sair\n");
         printf("Escolha uma opção: ");
         scanf("%s", opti);
 
@@ -143,7 +143,7 @@ int main() {
             if (decrypt_file(filename, outputfile, d, n_priv))
                 printf("Ficheiro decifrado com sucesso!\n");
         }
-        else if (strcmp(opti, "3") == 0) {
+        else if (strcmp(opti, "0") == 0) {
             break;
         }
         else {

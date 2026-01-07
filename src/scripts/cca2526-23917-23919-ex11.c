@@ -9,6 +9,7 @@ int main() {
     mpz_init(n);
     mpz_init(k);
     mpz_init(result);
+    printf("===== Combinações (n, k): =====\n");
 
     // Read values as strings
     printf("Introduza o número total de elementos (n): ");

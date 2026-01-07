@@ -29,6 +29,7 @@ void random_mpz(mpz_t rop, int bits) {
 }
 
 int main() {
+    printf("===== Geração de Chaves RSA com medição de tempo e armazenamento =====\n");
     int bits;
     printf("Introduza o tamanho das chaves em bits: ");
     scanf("%d", &bits);

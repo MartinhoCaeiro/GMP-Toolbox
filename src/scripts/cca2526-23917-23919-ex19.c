@@ -113,7 +113,7 @@ int main() {
         printf("\n==== MENU ====\n");
         printf("1. Cifrar ficheiro com chave publica\n");
         printf("2. Decifrar ficheiro com chave privada\n");
-        printf("3. Sair\n");
+        printf("0. Sair\n");
         printf("Escolha uma opção: ");
         scanf("%s", option);
 
@@ -123,11 +123,11 @@ int main() {
             scanf("%s", filename);
             printf("Nome do ficheiro de saída cifrado: ");
             scanf("%s", outputfile);
-            if (cifrar_ficheiro(filename, outputfile, e, n_pub))
+            if (encrypt_file(filename, outputfile, e, n_pub))
                 printf("Ficheiro cifrado com sucesso!\n");
         }
         else if (strcmp(option, "2") == 0) {
-            if (!ler_chave_privada("secret.myasc", d, n_priv)) continue;
+            if (!read_private_key("secret.myasc", d, n_priv)) continue;
             printf("Nome do ficheiro a decifrar: ");
             scanf("%s", filename);
             printf("Nome do ficheiro de saída decifrado: ");
@@ -135,7 +135,7 @@ int main() {
             if (decrypt_file(filename, outputfile, d, n_priv))
                 printf("Ficheiro decifrado com sucesso!\n");
         }
-        else if (strcmp(option, "3") == 0) {
+        else if (strcmp(option, "0") == 0) {
             break;
         }
         else {

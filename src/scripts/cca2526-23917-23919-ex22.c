@@ -185,7 +185,7 @@ int main() {
         printf("1. Cifrar ficheiro com chave publica\n");
         printf("2. Decifrar ficheiro com chave privada\n");
         printf("3. Gerar novas chaves RSA\n");
-        printf("4. Sair\n");
+        printf("0. Sair\n");
         printf("Escolha uma opção: ");
         scanf("%s", option);
 
@@ -213,7 +213,7 @@ int main() {
             scanf("%u", &k);
             generate_rsa_keys(k);
         }
-        else if (strcmp(option, "4") == 0) {
+        else if (strcmp(option, "0") == 0) {
             break;
         }
         else {

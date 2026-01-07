@@ -32,7 +32,7 @@ void rsa_decrypt(mpz_t m, mpz_t c, mpz_t d, mpz_t n) {
 int main() {
     int key_sizes[] = {128, 256, 512, 1024}; 
     int num_sizes = sizeof(key_sizes)/sizeof(key_sizes[0]);
-
+    printf("===== Medição de desempenho do RSA e visualização de gráfico =====\n");
     FILE *csv = fopen("rsa_times.csv", "w");
     if (!csv) { perror("Erro ao criar csv"); return 1; }
     fprintf(csv, "bits,keygen_time_sec,encrypt_time_sec,decrypt_time_sec\n");
