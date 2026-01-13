@@ -83,6 +83,46 @@ void write_binary_file(const char *nome, unsigned char *data, int len) {
     fclose(f);
 }
 
+// Convert HEX string to bytes
+int hex_string_to_bytes(const char *hex_str, unsigned char **bytes) {
+    int len = strlen(hex_str);
+    
+    // Remove spaces and count hex digits
+    int hex_len = 0;
+    for (int i = 0; i < len; i++) {
+        if (hex_str[i] != ' ' && hex_str[i] != '\n')
+            hex_len++;
+    }
+    
+    if (hex_len % 2 != 0) return -1;  // Invalid hex string
+    
+    int byte_len = hex_len / 2;
+    *bytes = (unsigned char *) malloc(byte_len);
+    if (!*bytes) return -1;
+    
+    int idx = 0;
+    for (int i = 0; i < len; i++) {
+        if (hex_str[i] == ' ' || hex_str[i] == '\n') continue;
+        
+        unsigned char high = hex_str[i];
+        unsigned char low = hex_str[++i];
+        
+        if (high >= '0' && high <= '9') high -= '0';
+        else if (high >= 'A' && high <= 'F') high -= 'A' - 10;
+        else if (high >= 'a' && high <= 'f') high -= 'a' - 10;
+        else return -1;
+        
+        if (low >= '0' && low <= '9') low -= '0';
+        else if (low >= 'A' && low <= 'F') low -= 'A' - 10;
+        else if (low >= 'a' && low <= 'f') low -= 'a' - 10;
+        else return -1;
+        
+        (*bytes)[idx++] = (high << 4) | low;
+    }
+    
+    return byte_len;
+}
+
 // Load RC4 key from GMP file
 int load_key_gmp(const char *ficheiro, unsigned char **key) {
     mpz_t k;
@@ -141,15 +181,30 @@ int main() {
 
             if (type == 1) {
                 char temp[4096];
-                printf("Introduza a mensagem/criptograma: ");
-                getchar();
-                fgets(temp, sizeof(temp), stdin);
+                
+                if (option == 1) {
+                    // Encrypt mode
+                    printf("Introduza a mensagem: ");
+                    getchar();
+                    fgets(temp, sizeof(temp), stdin);
 
-                size = strlen(temp);
-                if (temp[size - 1] == '\n') size--;
+                    size = strlen(temp);
+                    if (temp[size - 1] == '\n') size--;
 
-                entry = (unsigned char *) malloc(size);
-                memcpy(entry, temp, size);
+                    entry = (unsigned char *) malloc(size);
+                    memcpy(entry, temp, size);
+                } else {
+                    // Decrypt mode - input should be HEX
+                    printf("Introduza o criptograma em HEX (ex: 1A 2B 3C): ");
+                    getchar();
+                    fgets(temp, sizeof(temp), stdin);
+
+                    size = hex_string_to_bytes(temp, &entry);
+                    if (size <= 0) {
+                        printf("Erro: formato HEX inválido.\n");
+                        continue;
+                    }
+                }
 
             } else if (type == 2) {
                 char nome[100];
@@ -169,13 +224,31 @@ int main() {
             // RC4 is symmetric
             rc4_crypt(entry, size, key, keylen);
 
+            // Display or save result
+            printf("\nResultado:\n");
+            
             if (type == 1) {
-                printf("\nResultado em HEX (%d bytes):\n", size);
-                for (int i = 0; i < size; i++)
-                    printf("%02X ", entry[i]);
-                printf("\n");
-
-            } else {
+                // Inline mode - only print to screen, NEVER save files
+                if (option == 1) {
+                    // Encrypt mode - show HEX
+                    printf("HEX (%d bytes):\n", size);
+                    for (int i = 0; i < size; i++)
+                        printf("%02X ", entry[i]);
+                    printf("\n");
+                } else {
+                    // Decrypt mode - show both HEX and text
+                    printf("HEX (%d bytes):\n", size);
+                    for (int i = 0; i < size; i++)
+                        printf("%02X ", entry[i]);
+                    printf("\n");
+                    
+                    printf("Texto:\n");
+                    for (int i = 0; i < size; i++)
+                        printf("%c", entry[i]);
+                    printf("\n");
+                }
+            } else if (type == 2 || type == 3) {
+                // File mode (text or binary) - save to file
                 char out[100];
                 printf("Nome do ficheiro de saida: ");
                 scanf("%99s", out);
