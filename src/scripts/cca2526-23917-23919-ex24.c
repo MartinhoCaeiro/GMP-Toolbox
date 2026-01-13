@@ -44,7 +44,7 @@ int main() {
     fclose(fconfig);
 
     do {
-        printf("\n=====Gerador LCG (GMP) =====\n");
+        printf("\n===== Gerador LCG (GMP) =====\n");
         printf("\n1 - Gerar valores pseudo-aleatorios");
         printf("\n0 - Sair");
         printf("\nEscolha uma opção: ");

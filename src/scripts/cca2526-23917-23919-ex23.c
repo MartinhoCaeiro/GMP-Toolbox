@@ -111,7 +111,7 @@ int main() {
     unsigned char iv[AES_IV_SIZE];
 
     while (1) {
-        printf("\n==== MENU ===="
+        printf("\n===== (De)cifrador de ficheiros com chave simétrica (AES-256) ====="
                "\n1. Cifrar ficheiro com chave simétrica (AES-256)"
                "\n2. Decifrar ficheiro com chave simétrica (AES-256)"
                "\n0. Sair"

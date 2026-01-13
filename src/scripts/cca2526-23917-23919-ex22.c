@@ -181,7 +181,7 @@ int main() {
     char outputfile[MAX_FILENAME];
 
     while (1) {
-        printf("\n==== MENU ====\n");
+        printf("\n===== (De)cifrador de ficheiros (Chaves de dimensão K bits) =====\n");
         printf("1. Cifrar ficheiro com chave publica\n");
         printf("2. Decifrar ficheiro com chave privada\n");
         printf("3. Gerar novas chaves RSA\n");
